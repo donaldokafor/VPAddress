@@ -17,6 +17,6 @@ node {
        stage 'test VPA'
        echo 'Tesing VPA API..'
        dir ('VPA.Test') { 
-              powershell 'dotnet test VPA.Test/VPA.Test.csproj -l "trx;LogFileName=VPATest.trx"'    
+              powershell 'dotnet test VPA.Test.csproj -l "trx;LogFileName=VPATest.trx"'    
        }     
 }
