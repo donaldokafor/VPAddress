@@ -10,14 +10,14 @@ node {
           echo 'Building vpa enquiry gateway...'
    
           dir ('VPA') { 
-                 sh '''dotnet restore
+                 powershell '''dotnet restore
                         dotnet build'''
   
               }          
        stage 'test vpa enquiry gateway'
           echo 'Tesing vpa enquiry gateway..'
           dir ('VPA.Test') { 
-              sh 'dotnet test VPA.Test.csproj -l "trx;LogFileName=VPATest.trx"'    
+              powershell 'dotnet test VPA.Test.csproj -l "trx;LogFileName=VPATest.trx"'    
           }
        docker.withRegistry("${env.REGISTRY_PROTOCOL}://${env.REGISTRY_HOST}:${env.REGISTRY_PORT}", 'docker_registry_credentials_id') 
        {
@@ -29,7 +29,7 @@ node {
            String imageName = "${env.REGISTRY_HOST}:${env.REGISTRY_PORT}/vpa-enquiry-gateway:latest"
   
            dir ('VPA') {      
-              sh "docker build -t ${imageName}  ."
+              powershell "docker build -t ${imageName}  ."
   
            }      
            def img = docker.image(imageName)
@@ -46,6 +46,6 @@ node {
         
           echo 'Deploying....'
     
-          sh "helm upgrade --install  vpa-enquiry-gateway ./helm --set image.repository=${env.KUBERNETES_REGISTRY_URL}/vpa-enquiry-gateway --set replicaCount=${env.REPLICAS}"
-            sh "helm history vpa-enquiry-gateway" 
+          powershell "helm upgrade --install  vpa-enquiry-gateway ./helm --set image.repository=${env.KUBERNETES_REGISTRY_URL}/vpa-enquiry-gateway --set replicaCount=${env.REPLICAS}"
+            powershell "helm history vpa-enquiry-gateway" 
 }
