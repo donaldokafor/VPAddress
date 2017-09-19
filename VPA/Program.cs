@@ -18,7 +18,7 @@ namespace VPA
                 .UseIISIntegration()
                 .UseStartup<Startup>()
                 .UseApplicationInsights()
-                .UseUrls("http://*:5000")
+                .UseUrls("http://*:8080")
                 .Build();
 
             host.Run();

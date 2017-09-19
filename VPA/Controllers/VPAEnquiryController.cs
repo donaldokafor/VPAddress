@@ -14,11 +14,12 @@ using FluentValidation.Results;
 using System.Collections.Generic;
 using LiteDB;
 using System.Linq;
+using System.Net.Http.Headers;
 
 namespace VPA.Controllers
 {
     [Produces("application/json")]
-    [Route("api/VPAEnquiry")]
+    [Route("v1/vpa")]
     public class VPAEnquiryController : Controller
     {
         //private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
@@ -29,8 +30,8 @@ namespace VPA.Controllers
         VPAEnquiryResponse _response;
         VPATranslateResponse _vpaTranslateResponse;
         VPAInformation _vInfo;
-        PersonalInformation _pInfo;
-        AccountInformation _aInfo;
+        personalInformation _pInfo;
+        accountInformation _aInfo;
         MerchantInformation _mInfo;
         List<AssociatedVpas> _aVpas;
         VPAEnquiryRequest _req;
@@ -45,7 +46,7 @@ namespace VPA.Controllers
         //}
 
         public VPAEnquiryController(IDistributedCache distributedCache, IOptions<AppSettings> settings, VPAEnquiryResponse response, VPATranslateResponse vpaTranslateResponse
-            , VPAInformation vInfo, PersonalInformation pInfo, AccountInformation aInfo, MerchantInformation mInfo, List<AssociatedVpas> aVpas, VPAEnquiryRequest req)
+            , VPAInformation vInfo, personalInformation pInfo, accountInformation aInfo, MerchantInformation mInfo, List<AssociatedVpas> aVpas, VPAEnquiryRequest req)
         {
             _distributedCache = distributedCache;
             _settings = settings;
@@ -58,14 +59,14 @@ namespace VPA.Controllers
             _aInfo = aInfo;
             _mInfo = mInfo;
         }      
-        [HttpPost("AddressEnquiry")]
-        public async Task<VPAEnquiryResponse> AddressEnquiry([FromBody] VPAEnquiryRequest request)
+        [HttpPost("enquiry")]
+        public async Task<VPAEnquiryResponse> enquiry([FromBody] VPAEnquiryRequest request)
         {
             //VPAEnquiryResponse response = new VPAEnquiryResponse();
             //VPATranslateResponse vpaTranslateResponse = new VPATranslateResponse();
             //VPAInformation vInfo = new VPAInformation();
-            //PersonalInformation pInfo = new PersonalInformation();
-            //AccountInformation aInfo = new AccountInformation();
+            //personalInformation pInfo = new personalInformation();
+            //accountInformation aInfo = new accountInformation();
             //MerchantInformation mInfo = new MerchantInformation();
             //List<AssociatedVpas> aVpas = new List<AssociatedVpas>();
 
@@ -193,7 +194,7 @@ namespace VPA.Controllers
                     virtualPaymentAddress = _vpaTranslateResponse.vpaId
                 };
                 _response.vpaInformation = _vInfo;
-                _pInfo = new PersonalInformation()
+                _pInfo = new personalInformation()
                 {
                     email = _vpaTranslateResponse.contactInformation.email,
                     mobilePhoneNumber = _vpaTranslateResponse.contactInformation.phone
@@ -224,7 +225,7 @@ namespace VPA.Controllers
             {
                 if (_vpaTranslateResponse != null && !string.IsNullOrEmpty(_vpaTranslateResponse.accountNumber))
                 {
-
+                    accountEnquiryResponse aer = new accountEnquiryResponse();
                     AccountEnquiryRequest arequest = new AccountEnquiryRequest()
                     {
                         channelCode = request.channelCode,
@@ -233,20 +234,32 @@ namespace VPA.Controllers
                         requestId = request.requestId,
                         targetAccountNumber = _vpaTranslateResponse.accountNumber
                     };
-
+                    aer = await accountEnquiry(arequest);
                     if (_settings.Value.isTest)
                     {
                         _aInfo = await testAccountEnquiry(arequest);
+                        //aer = await accountEnquiry(arequest);
+                        //_aInfo = aer.accountInformation;
+                        _pInfo = new personalInformation()
+                        {
+                            email = (_aInfo.personalinformation != null && !string.IsNullOrEmpty(_aInfo.personalinformation.email)) ? _aInfo.personalinformation.email : string.Empty,
+                            mobilePhoneNumber = (_aInfo.personalinformation != null && !string.IsNullOrEmpty(_aInfo.personalinformation.mobilePhoneNumber)) ? _aInfo.personalinformation.mobilePhoneNumber : string.Empty
+                        };
                     }
                     else
                     {
-                        _aInfo = await accountEnquiry(arequest);
+                        _aInfo = aer.accountInformation;
+                        _pInfo = new personalInformation()
+                        {
+                            email = (aer.personalInformation != null && !string.IsNullOrEmpty(aer.personalInformation.email)) ? aer.personalInformation.email : string.Empty,
+                            mobilePhoneNumber = (aer.personalInformation != null && !string.IsNullOrEmpty(aer.personalInformation.mobilePhoneNumber)) ? aer.personalInformation.mobilePhoneNumber : string.Empty
+                        };
                     }
 
-                    bool OK = _aInfo.http_status_code == (int)HttpStatusCode.OK ||
-                   _aInfo.http_status_code == (int)HttpStatusCode.Created || _aInfo.http_status_code == (int)HttpStatusCode.Accepted;
-
-                    if (_aInfo == null || !OK)
+                    // bool OK = _aInfo.http_status_code == (int)HttpStatusCode.OK ||
+                    //_aInfo.http_status_code == (int)HttpStatusCode.Created || _aInfo.http_status_code == (int)HttpStatusCode.Accepted;
+                    bool OK = string.IsNullOrEmpty(_aInfo.accountNumber);
+                    if (_aInfo == null || OK)
                     {
                         _response.httpStatusCode = _aInfo.http_status_code;
                         _response.error = _aInfo.error;
@@ -254,13 +267,9 @@ namespace VPA.Controllers
                         return _response;
                     }
 
-                    _pInfo = new PersonalInformation()
-                    {
-                        email = _aInfo.personalinformation.email,
-                        mobilePhoneNumber = _aInfo.personalinformation.mobilePhoneNumber
-                    };
+                  
 
-                    //AccountInformation ai = new AccountInformation()
+                    //accountInformation ai = new accountInformation()
                     //{
                     //    accountCategory = aInfo.accountCategory,
                     //    accountCurrency = aInfo.accountCurrency,
@@ -274,7 +283,7 @@ namespace VPA.Controllers
                     //    authorizationCredentialsAllowed = aInfo.authorizationCredentialsAllowed,
                     //    authorizationCredentialsLength = aInfo.authorizationCredentialsLength,
                     //    authorizationCredentialsType = aInfo.authorizationCredentialsType,
-                    //    personalinformation = pInfo,
+                    //    personalInformation = pInfo,
                     //    verificationNumber = aInfo.verificationNumber,
                     //    verificationNumberType = aInfo.verificationNumberType
                     //};
@@ -397,17 +406,21 @@ namespace VPA.Controllers
             }
             return vpaTranslateResponse;
         }
-        public async Task<AccountInformation> accountEnquiry(AccountEnquiryRequest request)
+        public async Task<accountEnquiryResponse> accountEnquiry(AccountEnquiryRequest request)
         {
-            AccountInformation ai = new AccountInformation();
+            accountEnquiryResponse ai = new accountEnquiryResponse();
+            //accountInformation ai = new accountInformation();
             string reqString = string.Empty;
             string resultContent = string.Empty;
             string _ContentType = "application/json";
             string baseUri = _settings.Value.accountEnquiryUri;
+            string jwtoken = await getJWToken(_settings.Value.apiKey);
+            jwtoken = "jat " + jwtoken;
             try
             {
                 using (var client = new HttpClient())
                 {
+                    client.DefaultRequestHeaders.Add("Authorization", jwtoken);
                     AccountEnquiryRequest areq = new AccountEnquiryRequest()
                     {
                         channelCode = request.channelCode,
@@ -418,12 +431,12 @@ namespace VPA.Controllers
                     };
                     reqString = JsonHelper.toJson(areq);
                     var content = new StringContent(reqString, Encoding.UTF8, _ContentType);
-                    var result = await client.PostAsync(baseUri + "accountenquiry", content);
+                    var result = await client.PostAsync(baseUri, content);
                     resultContent = await result.Content.ReadAsStringAsync();
                 };
                 try
                 {
-                    ai = JsonHelper.fromJson<AccountInformation>(resultContent);
+                    ai = JsonHelper.fromJson<accountEnquiryResponse>(resultContent);
                 }
                 catch (Exception ec)
                 {
@@ -460,19 +473,47 @@ namespace VPA.Controllers
             }
         }
 
-
-        //Unit test Methods
-        public async Task<AccountInformation> testAccountEnquiry(AccountEnquiryRequest arequest)
+        public async Task<string> getJWToken(string apiToken)
         {
-            AccountInformation ai = new AccountInformation();
+            string jwtoken = string.Empty;
+            string _ContentType = "application/json";
+            string resultContent = string.Empty;
+
+            JWT jwt = new JWT();
+
+            try
+            {
+                string uri = _settings.Value.jwtokenUri;
+                uri = uri + "?api-key=" + apiToken;
+
+                using (var client = new HttpClient())
+                {
+                    var content = new StringContent(string.Empty, Encoding.UTF8, _ContentType);
+                    var result = await client.PostAsync(uri, content);
+                    resultContent = await result.Content.ReadAsStringAsync();
+                };
+
+                jwt = JsonHelper.fromJson<JWT>(resultContent);
+                jwtoken = jwt.jat;
+            }
+            catch (Exception ex)
+            {
+
+            }
+            return jwtoken;
+        }
+        //Unit test Methods
+        public async Task<accountInformation> testAccountEnquiry(AccountEnquiryRequest arequest)
+        {
+            accountInformation ai = new accountInformation();
             try
             {
                 // Open database (or create if not exits)
-                PersonalInformation pi = new PersonalInformation();
+                personalInformation pi = new personalInformation();
                 pi.email = "beitbart@yahoo.go";
                 pi.mobilePhoneNumber = "2348012345678";
 
-                AccountInformation a = new AccountInformation();
+                accountInformation a = new accountInformation();
                 a.accountCategory = 1;
                 a.accountCurrency = "NGN";
                 a.accountEntityName = "Eddy Murphy";
@@ -497,7 +538,7 @@ namespace VPA.Controllers
                 {
                     var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
                     string result = await content.ReadAsStringAsync();
-                    ai = JsonHelper.fromJson<AccountInformation>(result);
+                    ai = JsonHelper.fromJson<accountInformation>(result);
 
                 }
                 catch (Exception ec)
@@ -625,7 +666,7 @@ namespace VPA.Controllers
             VPATranslateResponse v = new VPATranslateResponse();
             v.accountCurrency = "NGN";
             v.accountName = "Emeka Olu";
-            v.accountNumber = "0123456789";
+            v.accountNumber = "286-491664-2295";
             v.associatedVpas = avs;
             v.contactInformation = c;
             v.error = "";

@@ -21,16 +21,16 @@ namespace VPA.Test
             VPAEnquiryResponse response = new VPAEnquiryResponse();
             VPATranslateResponse vtr = new VPATranslateResponse();
             VPAInformation vInfo = new VPAInformation();
-            PersonalInformation pInfo = new PersonalInformation();
-            AccountInformation aInfo = new AccountInformation();
+            personalInformation pInfo = new personalInformation();
+            accountInformation aInfo = new accountInformation();
             MerchantInformation mInfo = new MerchantInformation();
             List<AssociatedVpas> aVpas = new List<AssociatedVpas>();
             VPAEnquiryRequest req = new VPAEnquiryRequest();
             VPAEnquiryRequest vrequest = new VPAEnquiryRequest()
             {
-                channelCode = 7,
+                channelCode = 1,
                 instructedInstitutionCode = "044",
-                instructingInstitutionCode = "230",
+                instructingInstitutionCode = "014",
                 requestId = "hdfufsh3652",
                 targetVPA = "fuzzytoocool",
                 updatedOn = DateTime.Now
@@ -52,8 +52,8 @@ namespace VPA.Test
             VPAEnquiryResponse response = new VPAEnquiryResponse();
             VPATranslateResponse vtr = new VPATranslateResponse();
             VPAInformation vInfo = new VPAInformation();
-            PersonalInformation pInfo = new PersonalInformation();
-            AccountInformation aInfo = new AccountInformation();
+            personalInformation pInfo = new personalInformation();
+            accountInformation aInfo = new accountInformation();
             MerchantInformation mInfo = new MerchantInformation();
             List<AssociatedVpas> aVpas = new List<AssociatedVpas>();
             VPAEnquiryRequest req = new VPAEnquiryRequest();
@@ -66,7 +66,7 @@ namespace VPA.Test
                 targetAccountNumber = "2024878029"
             };
 
-            AccountInformation ainf = new AccountInformation();
+            accountInformation ainf = new accountInformation();
             VPAEnquiryController controller = new VPAEnquiryController(getCacheSettings(), getAppSettings(), response, vtr, vInfo, pInfo, aInfo, mInfo, aVpas, req);
             ainf = await controller.testAccountEnquiry(arequest);
 
@@ -79,8 +79,8 @@ namespace VPA.Test
             VPAEnquiryResponse response = new VPAEnquiryResponse();
             VPATranslateResponse vtr = new VPATranslateResponse();
             VPAInformation vInfo = new VPAInformation();
-            PersonalInformation pInfo = new PersonalInformation();
-            AccountInformation aInfo = new AccountInformation();
+            personalInformation pInfo = new personalInformation();
+            accountInformation aInfo = new accountInformation();
             MerchantInformation mInfo = new MerchantInformation();
             List<AssociatedVpas> aVpas = new List<AssociatedVpas>();
             VPAEnquiryRequest req = new VPAEnquiryRequest()
@@ -95,7 +95,7 @@ namespace VPA.Test
 
             VPAEnquiryResponse respose = new VPAEnquiryResponse();
             VPAEnquiryController controller = new VPAEnquiryController(getCacheSettings(), getAppSettings(), response, vtr, vInfo, pInfo, aInfo, mInfo, aVpas, req);
-            respose = await controller.AddressEnquiry(req);
+            respose = await controller.enquiry(req);
 
             Assert.NotNull(respose.httpStatusCode);
             Assert.Equal((int)HttpStatusCode.OK, respose.httpStatusCode);

@@ -10,6 +10,8 @@ namespace VPA.Models
         public string translateUri;
         public string accountEnquiryUri;
         public bool isTest;
+        public string jwtokenUri;
+        public string apiKey;
         //public string redisIP;
         //public string redisInstanceName;
     }

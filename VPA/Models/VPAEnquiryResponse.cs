@@ -10,8 +10,8 @@ namespace VPA.Models
         public int httpStatusCode { get; set; }
         public string error { get; set; }
         public string errorDescription { get; set; }
-        public AccountInformation accountInformation { get; set; }
-        public PersonalInformation personalInformation { get; set; }
+        public accountInformation accountInformation { get; set; }
+        public personalInformation personalInformation { get; set; }
         public VPAInformation vpaInformation { get; set; }
         public MerchantInformation merchantInformation { get; set; }
     }

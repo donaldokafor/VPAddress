@@ -1,4 +1,4 @@
-FROM microsoft/dotnet:runtime
+FROM microsoft/dotnet:2.0.0-sdk
 WORKDIR /app
 
 # Copy csproj and restore as distinct layers
@@ -10,8 +10,8 @@ COPY . .
 RUN dotnet publish -c Release -o out
 
 
-EXPOSE 5000/tcp
+EXPOSE 8080/tcp
 
-ENV ASPNETCORE_URLS http://*:5000
+ENV ASPNETCORE_URLS http://*:8080
 
 ENTRYPOINT ["dotnet", "out/VPA.dll"]

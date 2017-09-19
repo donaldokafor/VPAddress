@@ -83,8 +83,8 @@ namespace VPA
             services.AddScoped<VPAEnquiryResponse>();
             services.AddScoped<VPATranslateResponse>();
             services.AddScoped<VPAInformation>();
-            services.AddScoped<PersonalInformation>();
-            services.AddScoped<AccountInformation>();
+            services.AddScoped<personalInformation>();
+            services.AddScoped<accountInformation>();
             services.AddScoped<MerchantInformation>();
             services.AddScoped<List<AssociatedVpas>>();
             services.AddScoped<AssociatedVpas>();
@@ -106,9 +106,11 @@ namespace VPA
             });
 
             //AppSettings
-            services.Configure<AppSettings>(options =>
+            services.Configure<AppSettings>(options => 
             {
                 options.translateUri = Configuration.GetSection("AppSettings:translateUri").Value;
+                options.jwtokenUri = Configuration.GetSection("AppSettings:jwtokenUri").Value;
+                options.apiKey = Configuration.GetSection("AppSettings:apiKey").Value;
                 options.accountEnquiryUri = Configuration.GetSection("AppSettings:accountEnquiryUri").Value;
                 options.isTest = Convert.ToBoolean(Configuration.GetSection("AppSettings:isTest").Value);
             });
@@ -129,6 +131,7 @@ namespace VPA
 
             //app.UseStatusCodePages();
             //app.UseCors("CorsPolicy");
+            
             app.UseSession();
             app.UseCors("CorsPolicy");
             //app.UseSession();

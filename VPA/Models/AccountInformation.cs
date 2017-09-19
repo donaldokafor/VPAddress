@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace VPA.Models
 {
-    public class AccountInformation
+    public class accountInformation
     {
         public int http_status_code { get; set; }
         public string error { get; set; }
@@ -24,6 +24,6 @@ namespace VPA.Models
         public string authorizationCredentialsAllowed { get; set; }
         public string authorizationCredentialsType { get; set; }
         public string authorizationCredentialsLength { get; set; }
-        public PersonalInformation personalinformation { get; set; }
+        public personalInformation personalinformation { get; set; }
     }
 }

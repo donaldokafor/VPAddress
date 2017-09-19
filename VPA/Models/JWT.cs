@@ -5,9 +5,8 @@ using System.Threading.Tasks;
 
 namespace VPA.Models
 {
-    public class personalInformation
+    public class JWT
     {
-        public string mobilePhoneNumber { get; set; }
-        public string email { get; set; }
+        public string jat { get; set; }
     }
 }
