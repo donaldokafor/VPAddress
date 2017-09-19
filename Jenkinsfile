@@ -26,7 +26,7 @@ node {
         
            echo 'Building docker image....'
         
-           String imageName = "${env.REGISTRY_HOST}:${env.REGISTRY_PORT}/vpa-enquiry-gateway:latest"
+           String imageName = "localhost:5000/vpa-enquiry-gateway:latest"
   
            dir ('VPA') {      
               powershell "docker build -t ${imageName}  ."
