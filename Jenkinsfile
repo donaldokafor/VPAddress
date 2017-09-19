@@ -19,7 +19,7 @@ node {
           dir ('VPA.Test') { 
               powershell 'dotnet test VPA.Test.csproj -l "trx;LogFileName=VPATest.trx"'    
           }
-       docker.withRegistry("${env.REGISTRY_PROTOCOL}://${env.REGISTRY_HOST}:${env.REGISTRY_PORT}", 'docker_registry_credentials_id') 
+       docker.withRegistry("${env.REGISTRY_PROTOCOL}://${env.REGISTRY_HOST}:${env.REGISTRY_PORT}") 
        {
         
          stage 'Build Docker Image'
